@@ -7,18 +7,22 @@
     },
     "servers": [
       {
-        "tag": "google",
-        "address": "https://8.8.8.8/dns-query",
+        "tag": "cloudflare",
+        "address": "https://1.1.1.1/dns-query",
         "detour": "proxy"
       },
       {
         "tag": "ali",
-        "address": "https://223.5.5.5/dns-query",
+        "address": "180.184.1.1",
         "detour": "direct"
       },
       {
         "tag": "fakeip",
         "address": "fakeip"
+      },
+      {
+        "tag": "block",
+        "address": "rcode://success"
       }
     ],
     "rules": [
@@ -43,6 +47,38 @@
         "action": "reject"
       },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "clash_mode": "AllowAds",
+            "invert": true
+          },
+          {
+            "rule_set": [
+              "AWAvenue-Ads",
+              "category-ads-all"
+            ]
+          }
+        ],
+        "action": "route-options",
+        "server": "block",
+        "disable_cache": true
+      },
+      {
+        "rule_set": [
+          "alibaba",
+          "category-games@cn"
+        ],
+        "action": "route",
+        "server": "ali"
+      },
+      {
+        "rule_set": "cn_domain",
+        "action": "route",
+        "server": "ali"
+      },
+      {
         "query_type": [
           "A",
           "AAAA"
@@ -50,14 +86,9 @@
         "action": "route",
         "server": "fakeip",
         "rewrite_ttl": 1
-      },
-      {
-        "rule_set": "cn_domain",
-        "action": "route",
-        "server": "ali"
       }
     ],
-    "final": "google",
+    "final": "cloudflare",
     "independent_cache": true
   },
   "route": {
@@ -86,6 +117,23 @@
         "action": "hijack-dns"
       },
       {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "clash_mode": "AllowAds",
+            "invert": true
+          },
+          {
+            "rule_set": [
+              "AWAvenue-Ads",
+              "category-ads-all"
+            ]
+          }
+        ],
+        "action": "reject"
+      },
+      {
         "ip_is_private": true,
         "action": "route",
         "outbound": "direct"
@@ -97,6 +145,14 @@
       },
       {
         "clash_mode": "Direct",
+        "action": "route",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "alibaba",
+          "category-games@cn"
+        ],
         "action": "route",
         "outbound": "direct"
       },
@@ -124,9 +180,9 @@
         "outbound": "youtube"
       },
       {
-        "rule_set": "openai_domain",
+        "rule_set": "ai_domain",
         "action": "route",
-        "outbound": "openai"
+        "outbound": "ai"
       },
       {
         "type": "logical",
@@ -194,6 +250,38 @@
         "download_detour": "direct"
       },
       {
+        "tag": "AWAvenue-Ads",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Singbox.srs",
+        "download_detour": "direct",
+        "update_interval": "24h"
+      },
+      {
+        "tag": "category-ads-all",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/CHIZI-0618/v2ray-rules-dat/release/singbox_rule_set/geosite-category-ads-all.srs",
+        "download_detour": "direct",
+        "update_interval": "24h"
+      },
+      {
+        "tag": "alibaba",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-alibaba.srs",
+        "download_detour": "direct",
+        "update_interval": "24h"
+      },
+      {
+        "tag": "category-games@cn",
+        "type": "remote",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-games@cn.srs",
+        "download_detour": "direct",
+        "update_interval": "24h"
+      },
+      {
         "tag": "apple_domain",
         "type": "remote",
         "format": "binary",
@@ -257,10 +345,10 @@
         "download_detour": "direct"
       },
       {
-        "tag": "openai_domain",
+        "tag": "ai_domain",
         "type": "remote",
         "format": "binary",
-        "url": "https://ghfast.top/https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/refs/heads/sing/geo/geosite/openai.srs",
+        "url": "https://github.com/DustinWin/ruleset_geodata/releases/download/sing-box-ruleset/ai.srs",
         "download_detour": "direct"
       },
       {
@@ -464,7 +552,7 @@
       "default": "proxy"
     },
     {
-      "tag": "openai",
+      "tag": "ai",
       "type": "selector",
       "outbounds": [
         "proxy",
